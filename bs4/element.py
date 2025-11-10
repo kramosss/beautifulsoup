@@ -1107,7 +1107,7 @@ class PageElement(object):
                 stacklevel=_stacklevel,
             )
 
-        from bs4.filter import ElementFilter
+        from bs4.filter import ElementFilter, SoupStrainer
 
         if isinstance(name, ElementFilter):
             matcher = name
@@ -2883,4 +2883,4 @@ class ResultSet(List[_PageElementT], Generic[_PageElementT]):
 # import SoupStrainer itself into this module to preserve the
 # backwards compatibility of anyone who imports
 # bs4.element.SoupStrainer.
-from bs4.filter import SoupStrainer # noqa: E402
+# from bs4.filter import SoupStrainer # noqa: E402

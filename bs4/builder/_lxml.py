@@ -389,14 +389,20 @@ class LXMLTreeBuilderForXML(TreeBuilder):
                 final_attrs[attr] = value
 
         namespace, tag = self._getNsTag(tag)
-        nsprefix = self._prefix_for_namespace(namespace)
-        self.soup.handle_starttag(
+        
+        
+        tag_object = self.soup.handle_starttag(
             tag,
             namespace,
             nsprefix,
             final_attrs,
             namespaces=self.active_namespace_prefixes[-1],
         )
+
+        replacer = self.soup.builder.replacer
+        if replacer is not None and tag_object is not None:
+            replacer.replace(tag_object)
+
 
     def _prefix_for_namespace(
         self, namespace: Optional[_NamespaceURL]

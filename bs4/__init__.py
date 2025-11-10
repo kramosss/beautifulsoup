@@ -90,6 +90,8 @@ from .element import (
 from .formatter import Formatter
 from .filter import (
     ElementFilter,
+    # Soup Replacer import 
+    SoupReplacer,
     SoupStrainer,
 )
 from typing import (
@@ -215,8 +217,22 @@ class BeautifulSoup(Tag):
         from_encoding: Optional[_Encoding] = None,
         exclude_encodings: Optional[_Encodings] = None,
         element_classes: Optional[Dict[Type[PageElement], Type[PageElement]]] = None,
+        replacer: Optional[SoupReplacer] = None,
         **kwargs: Any,
     ):
+        # Ensure the root tag is initialized with contents
+        super().__init__(
+            name=self.ROOT_TAG_NAME,
+            attrs={},
+            parent=None,
+            previous=None,
+            is_xml=None,
+            builder=None,
+            namespace=None,
+            sourceline=None,
+            sourcepos=None,
+        )
+        self.contents = []
         """Constructor.
 
         :param markup: A string or a file-like object representing
@@ -254,6 +270,9 @@ class BeautifulSoup(Tag):
          like to be instantiated instead as the parse tree is
          built. This is useful for subclassing Tag or NavigableString
          to modify default behavior.
+
+        :param replacer: A SoupReplacer. Replaces every original tag in
+        a document with an alternative tag. 
 
         :param kwargs: For backwards compatibility purposes, the
          constructor accepts certain keyword arguments used in
@@ -368,11 +387,14 @@ class BeautifulSoup(Tag):
                 )
             builder_class = possible_builder_class
 
+        # Set replacer before instantiating the builder so it is passed correctly
+        self.replacer = replacer
+
         # At this point either we have a TreeBuilder instance in
         # builder, or we have a builder_class that we can instantiate
         # with the remaining **kwargs.
         if builder is None:
-            builder = builder_class(**kwargs)
+            builder = builder_class(replacer=self.replacer, **kwargs)
             if (
                 not original_builder
                 and not (
@@ -435,6 +457,9 @@ class BeautifulSoup(Tag):
         self.known_xml = self.is_xml
         self._namespaces = dict()
         self.parse_only = parse_only
+        self.contents = []
+        # Store replace here
+        self.replacer = replacer
 
         if hasattr(markup, "read"):  # It's a file-type object.
             markup = markup.read()

@@ -230,9 +230,14 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
             sourceline, sourcepos = self.parser.tokenizer.stream.position()
             assert sourcepos is not None
             sourcepos = sourcepos - 1
+
         tag = self.soup.new_tag(
             name, namespace, sourceline=sourceline, sourcepos=sourcepos
         )
+
+        replacer = self.soup.builder.replacer
+        if replacer is not None and tag is not None:
+            replacer.replace(tag)
 
         return Element(tag, self.soup, namespace)
 
